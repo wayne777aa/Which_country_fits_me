@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首頁</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 150px;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .add-country-button {
+            background-color: #28a745;
+        }
+
+        .add-country-button:hover {
+            background-color: #218838;
+        }
+
+        .edit-country-button {
+            background-color: #ffc107;
+        }
+
+        .edit-country-button:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>歡迎來到國家推薦系統</h1>
+
+    <div class="action-buttons">
+        <!-- 開始按鈕 -->
+        <button class="action-button" onclick="window.location.href='/start'">開始</button>
+
+        <!-- 新增國家按鈕 -->
+        <button class="action-button add-country-button" onclick="window.location.href='/add-country'">新增國家</button>
+
+        <!-- 修改國家按鈕 -->
+        <button class="action-button edit-country-button" onclick="window.location.href='/edit-country'">修改國家</button>
+    </div>
+
+</body>
+</html>
