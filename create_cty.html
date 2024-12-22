@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增國家</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+        }
+
+        .submit-button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .submit-button:hover {
+            background-color: #218838;
+        }
+
+        .back-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-button a {
+            font-size: 16px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .back-button a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>新增國家</h1>
+
+    <div class="form-container">
+        <form id="country-form" action="/save-country" method="POST" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="country-name">國家名字</label>
+                <input type="text" id="country-name" name="country_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="area">國家面積 (km²)</label>
+                <input type="number" id="area" name="area" min="1" max="1000000000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="population-density">人口密度 (p/km²)</label>
+                <input type="number" id="population-density" name="population_density" min="1" max="50000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="military-size">武裝部隊規模</label>
+                <input type="number" id="military-size" name="military_size" min="0" max="100000000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="alcohol-consumption">平均每人消耗酒精公升數 (l/p)</label>
+                <input type="number" id="alcohol-consumption" name="alcohol_consumption" min="0" max="20" required>
+            </div>
+
+            <div class="form-group">
+                <label for="safety-score">安全分數</label>
+                <input type="number" id="safety-score" name="safety_score" min="0" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="political-rights">政治權利分數</label>
+                <input type="number" id="political-rights" name="political_rights" min="0" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="civil-liberties">公民自由分數</label>
+                <input type="number" id="civil-liberties" name="civil_liberties" min="0" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="education-score">教育分數</label>
+                <input type="number" id="education-score" name="education_score" min="0" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="healthcare-score">醫療環境分數</label>
+                <input type="number" id="healthcare-score" name="healthcare_score" min="0" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cpi">CPI (0~5000)</label>
+                <input type="number" id="cpi" name="cpi" min="0" max="5000" required>
+            </div>
+
+            <button type="submit" class="submit-button">提交</button>
+        </form>
+
+        <div class="back-button">
+            <a href="/">返回首頁</a>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            const form = document.getElementById('country-form');
+            const fields = form.elements;
+            let isValid = true;
+
+            for (let field of fields) {
+                if (field.type === "number" && field.value !== "") {
+                    const min = parseFloat(field.min);
+                    const max = parseFloat(field.max);
+                    const value = parseFloat(field.value);
+
+                    if (value < min || value > max) {
+                        alert(`請輸入有效的數字：${field.name} 須在 ${min} 到 ${max} 之間`);
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+
+            return isValid;
+        }
+    </script>
+
+</body>
+</html>
