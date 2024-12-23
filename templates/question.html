@@ -233,7 +233,9 @@
 
             const response = await fetch('/analyze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     countrySize, density, army, alcohol, safety,
                     politicalRights, civilLiberties, education,
@@ -241,12 +243,13 @@
                 })
             });
 
-            const data = await response.json();
-            document.getElementById("question10").classList.remove("active");
-            document.getElementById("result").innerHTML = `
-                <h2>推薦國家</h2>
-                <p>${data.country || '沒有找到適合的國家。'}</p>
-            `;
+
+            if (response.ok) {
+                // 重定向到結果頁面
+                window.location.href = "/result";
+            } else {
+                alert("提交失敗，請稍後再試！");
+            }
         }
 
     </script>
