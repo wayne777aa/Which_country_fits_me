@@ -29,7 +29,7 @@ CREATE TABLE World_data(
     Abbreviation varchar(50),
     Agricultural_Land_Percentage float,
     LandArea int,
-    ArmedForcesSize int,
+    ArmedForcesSize float,
     BirthRate float,
     CallingCode varchar(50),
     Capital varchar(50),
@@ -92,7 +92,6 @@ fields terminated by ','
 lines terminated by '\n'
 ignore 1 lines;
 
-
 CREATE TABLE countryinfo as
 Select temp.country_name, temp.AveragScore, temp.SafetySecurity, temp.PersonelFreedom, temp.Governance, temp.SocialCapital, temp.InvestmentEnvironment, temp.EnterpriseConditions, temp.MarketAccessInfrastructure, temp.EconomicQuality, temp.LivingConditions, temp.Health, temp.Education, temp.NaturalEnvironment,
        temp.PopulationDensity, temp.Abbreviation, temp.Agricultural_Land_Percentage, temp.LandArea, temp.ArmedForcesSize, temp.BirthRate, temp.CallingCode, temp.Capital, temp.CO2Emissions, temp.CPI, temp.CPIChange_Percentage, temp.CurrencyCode, temp.FertilityRate, temp.ForestedArea_Percentage, temp.Gasoline_Price, temp.GDP, temp.GrossPrimaryEducationEnrollment_Percentage, temp.GrossTertiaryEducationEnrollment_Percentage, temp.InfantMortality, temp.LargestCity, temp.LifeExpectancy, temp.MaternalMortalityRatio, temp.MinimumWage, temp.OfficialLanguage, temp.OutofPocketHealthExpenditure_Percentage, temp.PhysiciansperThousand, temp.Population, temp.LaborForceParticipation_Percentage, temp.TaxRevenue_Percentage, temp.TotalTaxRate_Percentage, temp.UnemploymentRate_Percentage, temp.UrbanPopulation, temp.Latitude, temp.Longitude,
@@ -103,3 +102,20 @@ From (Select D.country_name, D.AveragScore, D.SafetySecurity, D.PersonelFreedom,
       Inner join World_data AS WD ON D.country_name = WD.country_name2) AS temp
 Inner join world_happiness AS WH
 ON temp.country_name = WH.country_name3
+;
+
+
+CREATE TABLE weights(
+    wid INT AUTO_INCREMENT,
+    countrySize INT,
+    density INT,
+    army INT,
+    forest INT,
+    safety INT,
+    politicalRights INT,
+    civilLiberties INT,
+    education INT,
+    healthcare INT,
+    economicStatus INT,
+    PRIMARY KEY (wid)
+);
