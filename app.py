@@ -36,6 +36,7 @@ def edit_country():
 # 國家修改提交
 @app.route('/save-country', methods=['POST'])
 def save_country():
+    # 接收表單數據
     country_name = request.form['country_name']
     area = request.form['area']
     population_density = request.form['population_density']
@@ -48,26 +49,35 @@ def save_country():
     healthcare_score = request.form['healthcare_score']
     cpi = request.form['cpi']
 
-    # 儲存新國家資料邏輯（可以存到資料庫或列表）
-    new_country = {
-        "id": len(countries) + 1,  # 根據需求設定 id，這裡假設是自動增長
-        "name": country_name,
-        "area": area,
-        "population_density": population_density,
-        "military_size": military_size,
-        "forest_percentage": forest_percentage,
-        "safety_score": safety_score,
-        "political_rights": political_rights,
-        "civil_liberties": civil_liberties,
-        "education_score": education_score,
-        "healthcare_score": healthcare_score,
-        "cpi": cpi,
-    }
+    # 假設性默認值（針對未提到的欄位）
+    default_governance = (float(political_rights) + float(civil_liberties)) / 2  # 假設 Governance = (政治權利 + 公民自由) / 2
 
-    countries.append(new_country)  # 把新國家加入到 countries 列表中
-    
-    # 可選：重定向到首頁或其他頁面
-    return redirect(url_for('index'))
+    # 建立資料庫連接並插入數據
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 插入數據到 countryinfo
+        cursor.execute("""
+            INSERT INTO countryinfo (
+                country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
+                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            country_name, area, population_density, military_size, forest_percentage,
+            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi
+        ))
+
+        # 提交更改並關閉連接
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('index'))
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'status': 'error', 'message': 'Database operation failed'}), 500
 
 
 @app.route('/analyze', methods=['POST'])
