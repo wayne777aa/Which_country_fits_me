@@ -106,6 +106,65 @@ def analyze():
     session['top_countries'] = top_countries
     return jsonify({'status': 'success'})
 
+@app.route('/search-country', methods=['POST'])
+def search_country():
+    country_name = request.form.get('country_name')
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
+        country = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if country:
+            # 成功找到國家數據，渲染展示頁面
+            return render_template('display.html', **country)
+        else:
+            # 如果找不到數據，顯示錯誤訊息
+            return "找不到該國家數據", 404
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+@app.route('/update-country', methods=['POST'])
+def update_country():
+    try:
+        # 接收表單數據
+        country_name = request.form['country_name']
+        land_area = request.form['land_area']
+        population_density = request.form['population_density']
+        armed_forces_size = request.form['armed_forces_size']
+        forested_area_percentage = request.form['forested_area_percentage']
+        safety_security = request.form['safety_security']
+        governance = request.form['governance']
+        personal_freedom = request.form['personal_freedom']
+        education = request.form['education']
+        health = request.form['health']
+        cpi = request.form['cpi']
+
+        # 更新資料庫數據
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE countryinfo
+            SET LandArea = %s, PopulationDensity = %s, ArmedForcesSize = %s,
+                ForestedArea_Percentage = %s, SafetySecurity = %s, Governance = %s,
+                PersonelFreedom = %s, Education = %s, Health = %s, CPI = %s
+            WHERE country_name = %s
+        """, (land_area, population_density, armed_forces_size, forested_area_percentage,
+              safety_security, governance, personal_freedom, education, health, cpi, country_name))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect('/')
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+
+
 # 結果
 @app.route('/result')
 def result():

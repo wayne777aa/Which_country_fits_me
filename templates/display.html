@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國家數據編輯</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-actions button {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #218838;
+        }
+
+        .cancel-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>編輯國家數據</h1>
+        <form action="/update-country" method="POST">
+            <div class="form-group">
+                <label for="country_name">國家名字</label>
+                <input type="text" id="country_name" name="country_name" value= "{{ country_name }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="land_area">國家面積 (km²)</label>
+                <input type="number" id="land_area" name="land_area" min="1" max="1000000000" value="{{ land_area }}" required>
+            </div>
+            <div class="form-group">
+                <label for="population_density">人口密度 (p/km²)</label>
+                <input type="number" id="population_density" name="population_density" min="1" max="50000" value="{{ population_density }}" required>
+            </div>
+            <div class="form-group">
+                <label for="armed_forces_size">武裝部隊規模</label>
+                <input type="number" id="armed_forces_size" name="armed_forces_size" min="0" max="100000000" value="{{ armed_forces_size }}" required>
+            </div>
+            <div class="form-group">
+                <label for="forested_area_percentage">森林面積百分比</label>
+                <input type="number" id="forested_area_percentage" name="forested_area_percentage" min="0" max="100" value="{{ forested_area_percentage }}" required>
+            </div>
+            <div class="form-group">
+                <label for="safety_security">安全分數</label>
+                <input type="number" id="safety_security" name="safety_security" min="0" max="100" value="{{ safety_security }}" required>
+            </div>
+            <div class="form-group">
+                <label for="governance">治理分數</label>
+                <input type="number" id="governance" name="governance" min="0" max="100" value="{{ governance }}" required>
+            </div>
+            <div class="form-group">
+                <label for="personal_freedom">公民自由分數</label>
+                <input type="number" id="personal_freedom" name="personal_freedom" min="0" max="100" value="{{ personal_freedom }}" required>
+            </div>
+            <div class="form-group">
+                <label for="education">教育分數</label>
+                <input type="number" id="education" name="education" min="0" max="100" value="{{ education }}" required>
+            </div>
+            <div class="form-group">
+                <label for="health">醫療分數</label>
+                <input type="number" id="health" name="health" min="0" max="100" value="{{ health }}" required>
+            </div>
+            <div class="form-group">
+                <label for="cpi">CPI</label>
+                <input type="number" id="cpi" name="cpi" min="0" max="5000" value="{{ cpi }}" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="save-button">保存</button>
+                <a href="/" class="cancel-button">取消</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
