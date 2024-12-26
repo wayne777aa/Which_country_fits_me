@@ -1,39 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+import mysql.connector
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # 用于session加密
+app.secret_key = 'your_secret_key'  # 用於session加密
 
-#測試資料
-countries = [
-    {
-        "id": 1,
-        "name": "Country1",
-        "area": 100000,
-        "population_density": 100,
-        "military_size": 5000,
-        "alcohol_consumption": 5.0,
-        "safety_score": 80,
-        "political_rights": 70,
-        "civil_liberties": 75,
-        "education_score": 85,
-        "healthcare_score": 90,
-        "cpi": 1000,
-    },
-    {
-        "id": 2,
-        "name": "Country2",
-        "area": 500000,
-        "population_density": 50,
-        "military_size": 10000,
-        "alcohol_consumption": 2.5,
-        "safety_score": 90,
-        "political_rights": 80,
-        "civil_liberties": 85,
-        "education_score": 88,
-        "healthcare_score": 92,
-        "cpi": 1200,
-    },
-]
+db_config = {
+    'host': 'localhost',
+    'user': 'root', # change to your own
+    'password': 'localhost', # change to your own
+    'database': 'countries'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
 
 # 首頁
 @app.route("/")
@@ -57,11 +36,12 @@ def edit_country():
 # 國家修改提交
 @app.route('/save-country', methods=['POST'])
 def save_country():
+    # 接收表單數據
     country_name = request.form['country_name']
     area = request.form['area']
     population_density = request.form['population_density']
     military_size = request.form['military_size']
-    alcohol_consumption = request.form['alcohol_consumption']
+    forest_percentage = request.form['forest_percentage']
     safety_score = request.form['safety_score']
     political_rights = request.form['political_rights']
     civil_liberties = request.form['civil_liberties']
@@ -69,36 +49,121 @@ def save_country():
     healthcare_score = request.form['healthcare_score']
     cpi = request.form['cpi']
 
-    # 儲存新國家資料邏輯（可以存到資料庫或列表）
-    new_country = {
-        "id": len(countries) + 1,  # 根據需求設定 id，這裡假設是自動增長
-        "name": country_name,
-        "area": area,
-        "population_density": population_density,
-        "military_size": military_size,
-        "alcohol_consumption": alcohol_consumption,
-        "safety_score": safety_score,
-        "political_rights": political_rights,
-        "civil_liberties": civil_liberties,
-        "education_score": education_score,
-        "healthcare_score": healthcare_score,
-        "cpi": cpi,
-    }
+    # 假設性默認值（針對未提到的欄位）
+    default_governance = (float(political_rights) + float(civil_liberties)) / 2  # 假設 Governance = (政治權利 + 公民自由) / 2
 
-    countries.append(new_country)  # 把新國家加入到 countries 列表中
+    # 建立資料庫連接並插入數據
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    # 可選：重定向到首頁或其他頁面
-    return redirect(url_for('index'))
+        # 插入數據到 countryinfo
+        cursor.execute("""
+            INSERT INTO countryinfo (
+                country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
+                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            country_name, area, population_density, military_size, forest_percentage,
+            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi
+        ))
+
+        # 提交更改並關閉連接
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('index'))
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'status': 'error', 'message': 'Database operation failed'}), 500
 
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.get_json()
     print(data)  # 用來檢查接收到的資料
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("TRUNCATE TABLE weights")
+    conn.commit()
+    cursor.execute("INSERT INTO weights (countrySize, density, army, forest, safety, politicalRights, civilLiberties, education, healthcare, economicStatus) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data["countrySize"], data["density"], data["army"], data["forest"], data["safety"], data["politicalRights"], data["civilLiberties"], data["education"], data["healthcare"], data["economicStatus"]))
+    conn.commit()
+
     # 處理數據的邏輯
-    top_countries = ['國家1', '國家2', '國家3']
+    cursor.execute("SELECT C.country_name, (C.LandArea / 1454000) * W.countrySize + (C.PopulationDensity / 26337) * W.density + (C.ArmedForcesSize / 1359000) * W.army + (C.ForestedArea_Percentage) * W.forest + (C.SafetySecurity / 100) * W.safety + (C.Governance / 100) * W.politicalRights + (C.PersonelFreedom / 100) * W.civilLiberties + (C.Education) * W.education + (C.Health / 100) * W.healthcare + (C.CPI / 4583.71) * W.economicStatus AS weightedScore FROM countryinfo AS C, weights AS W ORDER BY weightedScore DESC LIMIT 3")
+    
+    top_countries = []
+    for results in cursor.fetchmany(3):
+        top_countries.append(results[0])
+        print(results)
+    cursor.close()
+    conn.close()
+
     session['top_countries'] = top_countries
     return jsonify({'status': 'success'})
+
+@app.route('/search-country', methods=['POST'])
+def search_country():
+    country_name = request.form.get('country_name')
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
+        country = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if country:
+            # 成功找到國家數據，渲染展示頁面
+            return render_template('display.html', **country)
+        else:
+            # 如果找不到數據，顯示錯誤訊息
+            return "找不到該國家數據", 404
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+@app.route('/update-country', methods=['POST'])
+def update_country():
+    try:
+        # 接收表單數據
+        country_name = request.form['country_name']
+        land_area = request.form['land_area']
+        population_density = request.form['population_density']
+        armed_forces_size = request.form['armed_forces_size']
+        forested_area_percentage = request.form['forested_area_percentage']
+        safety_security = request.form['safety_security']
+        governance = request.form['governance']
+        personal_freedom = request.form['personal_freedom']
+        education = request.form['education']
+        health = request.form['health']
+        cpi = request.form['cpi']
+
+        # 更新資料庫數據
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE countryinfo
+            SET LandArea = %s, PopulationDensity = %s, ArmedForcesSize = %s,
+                ForestedArea_Percentage = %s, SafetySecurity = %s, Governance = %s,
+                PersonelFreedom = %s, Education = %s, Health = %s, CPI = %s
+            WHERE country_name = %s
+        """, (land_area, population_density, armed_forces_size, forested_area_percentage,
+              safety_security, governance, personal_freedom, education, health, cpi, country_name))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect('/')
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+
 
 # 結果
 @app.route('/result')

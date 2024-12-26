@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>更改國家</title>
+    <title>修改國家數據</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -24,45 +24,50 @@
             margin-bottom: 30px;
         }
 
-        .country-list {
-            width: 80%;
-            margin-top: 20px;
-        }
-
-        .country-item {
+        .form-container {
             background-color: #fff;
-            padding: 15px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: left;
         }
 
-        .country-item button {
-            margin-left: 10px;
-            padding: 8px 16px;
-            font-size: 14px;
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+        }
+
+        .submit-button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
         }
 
-        .edit-button {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .edit-button:hover {
-            background-color: #0056b3;
-        }
-
-        .delete-button {
-            background-color: #FF5733;
-            color: white;
-        }
-
-        .delete-button:hover {
-            background-color: #c13a1a;
+        .submit-button:hover {
+            background-color: #218838;
         }
 
         .back-button {
@@ -82,75 +87,12 @@
     </style>
 </head>
 <body>
-
-    <h1>更改國家</h1>
-
-    <div class="country-list" id="country-list">
-        <!-- Dynamically populated list of countries -->
-    </div>
-
-    <div class="back-button">
-        <a href="/">返回首頁</a>
-    </div>
-
-    <script>
-        // Function to fetch the list of countries from the server and display them
-        async function loadCountries() {
-            const response = await fetch('/get-countries'); // Backend route to fetch countries
-            const countries = await response.json();
-
-            const countryListContainer = document.getElementById('country-list');
-            countryListContainer.innerHTML = ''; // Clear existing list
-
-            countries.forEach(country => {
-                const countryItem = document.createElement('div');
-                countryItem.className = 'country-item';
-                countryItem.innerHTML = `
-                    <div>
-                        <strong>${country.name}</strong><br>
-                        面積: ${country.area} km²<br>
-                        人口密度: ${country.population_density} p/km²<br>
-                        武裝部隊規模: ${country.military_size}<br>
-                        酒精消耗: ${country.alcohol_consumption} l/p<br>
-                        安全分數: ${country.safety_score}<br>
-                        政治權利分數: ${country.political_rights}<br>
-                        公民自由分數: ${country.civil_liberties}<br>
-                        教育分數: ${country.education_score}<br>
-                        醫療環境分數: ${country.healthcare_score}<br>
-                        CPI: ${country.cpi}<br>
-                    </div>
-                    <div>
-                        <button class="edit-button" onclick="editCountry(${country.id})">修改</button>
-                        <button class="delete-button" onclick="deleteCountry(${country.id})">刪除</button>
-                    </div>
-                `;
-                countryListContainer.appendChild(countryItem);
-            });
-        }
-
-        // Function to edit a country's data
-        function editCountry(countryId) {
-            window.location.href = `/edit-country/${countryId}`; // Redirect to the edit page with the country's ID
-        }
-
-        // Function to delete a country
-        async function deleteCountry(countryId) {
-            const confirmation = confirm('您確定要刪除此國家嗎？');
-            if (confirmation) {
-                const response = await fetch(`/delete-country/${countryId}`, { method: 'DELETE' });
-
-                if (response.ok) {
-                    alert('國家已刪除');
-                    loadCountries(); // Reload the list after deletion
-                } else {
-                    alert('刪除失敗');
-                }
-            }
-        }
-
-        // Load countries when the page loads
-        window.onload = loadCountries;
-    </script>
-
+    <h1>查詢國家</h1>
+    <form action="/search-country" method="POST">
+        <label for="country_name">輸入國家名字:</label>
+        <input type="text" id="country_name" name="country_name" required>
+        <button type="submit">查詢</button>
+    </form>
+    <a href="/">返回首頁</a>
 </body>
 </html>

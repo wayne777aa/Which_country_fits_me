@@ -223,7 +223,7 @@
             const countrySize = document.getElementById("country-size").value;
             const density = document.getElementById("density").value;
             const army = document.getElementById("army").value;
-            const alcohol = document.getElementById("alcohol").value;
+            const forest = document.getElementById("forest").value;
             const safety = document.getElementById("safety").value;
             const politicalRights = document.getElementById("political-rights").value;
             const civilLiberties = document.getElementById("civil-liberties").value;
@@ -237,7 +237,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    countrySize, density, army, alcohol, safety,
+                    countrySize, density, army, forest, safety,
                     politicalRights, civilLiberties, education,
                     healthcare, economicStatus
                 })
