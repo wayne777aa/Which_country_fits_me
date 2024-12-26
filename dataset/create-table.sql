@@ -92,14 +92,29 @@ fields terminated by ','
 lines terminated by '\n'
 ignore 1 lines;
 
-
 CREATE TABLE countryinfo as
-Select temp.country_name, temp.AveragScore, temp.SafetySecurity, temp.PersonelFreedom, temp.Governance, temp.SocialCapital, temp.InvestmentEnvironment, temp.EnterpriseConditions, temp.MarketAccessInfrastructure, temp.EconomicQuality, temp.LivingConditions, temp.Health, temp.Education, temp.NaturalEnvironment,
-       temp.PopulationDensity, temp.Abbreviation, temp.Agricultural_Land_Percentage, temp.LandArea, temp.ArmedForcesSize, temp.BirthRate, temp.CallingCode, temp.Capital, temp.CO2Emissions, temp.CPI, temp.CPIChange_Percentage, temp.CurrencyCode, temp.FertilityRate, temp.ForestedArea_Percentage, temp.Gasoline_Price, temp.GDP, temp.GrossPrimaryEducationEnrollment_Percentage, temp.GrossTertiaryEducationEnrollment_Percentage, temp.InfantMortality, temp.LargestCity, temp.LifeExpectancy, temp.MaternalMortalityRatio, temp.MinimumWage, temp.OfficialLanguage, temp.OutofPocketHealthExpenditure_Percentage, temp.PhysiciansperThousand, temp.Population, temp.LaborForceParticipation_Percentage, temp.TaxRevenue_Percentage, temp.TotalTaxRate_Percentage, temp.UnemploymentRate_Percentage, temp.UrbanPopulation, temp.Latitude, temp.Longitude,
-       WH.Ladder_score, WH.Upper_whisker, WH.Lower_whisker, WH.Log_GDP_per_capita, WH.Social_support, WH.Healthy_life_expectancy, WH.Freedom_to_make_life_choices, WH.Generosity, WH.Perceptions_of_corruption, WH.Dystopia_residual
+Select temp.country_name, temp.LandArea, temp.PopulationDensity, temp.ArmedForcesSize, temp.ForestedArea_Percentage, 
+       temp.SafetySecurity, temp.Governance, temp.PersonelFreedom, temp.Education, temp.Health,  temp.CPI
 From (Select D.country_name, D.AveragScore, D.SafetySecurity, D.PersonelFreedom, D.Governance, D.SocialCapital, D.InvestmentEnvironment, D.EnterpriseConditions, D.MarketAccessInfrastructure, D.EconomicQuality, D.LivingConditions, D.Health, D.Education, D.NaturalEnvironment,
              WD.PopulationDensity, WD.Abbreviation, WD.Agricultural_Land_Percentage, WD.LandArea, WD.ArmedForcesSize, WD.BirthRate, WD.CallingCode, WD.Capital, WD.CO2Emissions, WD.CPI, WD.CPIChange_Percentage, WD.CurrencyCode, WD.FertilityRate, WD.ForestedArea_Percentage, WD.Gasoline_Price, WD.GDP, WD.GrossPrimaryEducationEnrollment_Percentage, WD.GrossTertiaryEducationEnrollment_Percentage, WD.InfantMortality, WD.LargestCity, WD.LifeExpectancy, WD.MaternalMortalityRatio, WD.MinimumWage, WD.OfficialLanguage, WD.OutofPocketHealthExpenditure_Percentage, WD.PhysiciansperThousand, WD.Population, WD.LaborForceParticipation_Percentage, WD.TaxRevenue_Percentage, WD.TotalTaxRate_Percentage, WD.UnemploymentRate_Percentage, WD.UrbanPopulation, WD.Latitude, WD.Longitude
       From Development AS D 
       Inner join World_data AS WD ON D.country_name = WD.country_name2) AS temp
 Inner join world_happiness AS WH
 ON temp.country_name = WH.country_name3
+;
+
+
+CREATE TABLE weights(
+    wid INT AUTO_INCREMENT,
+    countrySize INT,
+    density INT,
+    army INT,
+    forest INT,
+    safety INT,
+    politicalRights INT,
+    civilLiberties INT,
+    education INT,
+    healthcare INT,
+    economicStatus INT,
+    PRIMARY KEY (wid)
+);
