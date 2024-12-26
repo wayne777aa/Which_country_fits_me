@@ -1,39 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+import mysql.connector
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # 用于session加密
+app.secret_key = 'your_secret_key'  # 用於session加密
 
-#測試資料
-countries = [
-    {
-        "id": 1,
-        "name": "Country1",
-        "area": 100000,
-        "population_density": 100,
-        "military_size": 5000,
-        "alcohol_consumption": 5.0,
-        "safety_score": 80,
-        "political_rights": 70,
-        "civil_liberties": 75,
-        "education_score": 85,
-        "healthcare_score": 90,
-        "cpi": 1000,
-    },
-    {
-        "id": 2,
-        "name": "Country2",
-        "area": 500000,
-        "population_density": 50,
-        "military_size": 10000,
-        "alcohol_consumption": 2.5,
-        "safety_score": 90,
-        "political_rights": 80,
-        "civil_liberties": 85,
-        "education_score": 88,
-        "healthcare_score": 92,
-        "cpi": 1200,
-    },
-]
+db_config = {
+    'host': 'localhost',
+    'user': 'root', # change to your own
+    'password': 'localhost', # change to your own
+    'database': 'countries'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
 
 # 首頁
 @app.route("/")
@@ -61,7 +40,7 @@ def save_country():
     area = request.form['area']
     population_density = request.form['population_density']
     military_size = request.form['military_size']
-    alcohol_consumption = request.form['alcohol_consumption']
+    forest_percentage = request.form['forest_percentage']
     safety_score = request.form['safety_score']
     political_rights = request.form['political_rights']
     civil_liberties = request.form['civil_liberties']
@@ -76,7 +55,7 @@ def save_country():
         "area": area,
         "population_density": population_density,
         "military_size": military_size,
-        "alcohol_consumption": alcohol_consumption,
+        "forest_percentage": forest_percentage,
         "safety_score": safety_score,
         "political_rights": political_rights,
         "civil_liberties": civil_liberties,
@@ -95,8 +74,25 @@ def save_country():
 def analyze():
     data = request.get_json()
     print(data)  # 用來檢查接收到的資料
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("TRUNCATE TABLE weights")
+    conn.commit()
+    cursor.execute("INSERT INTO weights (countrySize, density, army, forest, safety, politicalRights, civilLiberties, education, healthcare, economicStatus) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data["countrySize"], data["density"], data["army"], data["forest"], data["safety"], data["politicalRights"], data["civilLiberties"], data["education"], data["healthcare"], data["economicStatus"]))
+    conn.commit()
+
     # 處理數據的邏輯
-    top_countries = ['國家1', '國家2', '國家3']
+    cursor.execute("SELECT C.country_name, (C.LandArea / 1454000) * W.countrySize + (C.PopulationDensity / 26337) * W.density + (C.ArmedForcesSize / 1359000) * W.army + (C.ForestedArea_Percentage) * W.forest + (C.SafetySecurity / 100) * W.safety + (C.Governance / 100) * W.politicalRights + (C.PersonelFreedom / 100) * W.civilLiberties + (C.Education) * W.education + (C.Health / 100) * W.healthcare + (C.CPI / 4583.71) * W.economicStatus AS weightedScore FROM countryinfo AS C, weights AS W ORDER BY weightedScore DESC LIMIT 3")
+    
+    top_countries = []
+    for results in cursor.fetchmany(3):
+        top_countries.append(results[0])
+        print(results)
+    cursor.close()
+    conn.close()
+
     session['top_countries'] = top_countries
     return jsonify({'status': 'success'})
 
