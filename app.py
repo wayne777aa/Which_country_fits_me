@@ -65,7 +65,7 @@ def save_country():
     }
 
     countries.append(new_country)  # 把新國家加入到 countries 列表中
-
+    
     # 可選：重定向到首頁或其他頁面
     return redirect(url_for('index'))
 
