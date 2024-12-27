@@ -46,7 +46,7 @@
         <thead>
             <tr>
                 <th>國家名稱</th>
-                <th>操作</th>
+                <th style="width: 150px;">操作</th>
             </tr>
         </thead>
         <tbody>
@@ -55,6 +55,7 @@
                 <td>{{ country.country_name }}</td>
                 <td>
                     <a href="/edit-country-form/{{ country.country_name }}">編輯</a>
+                    <a href="/delete-country/{{ country.country_name }}">刪除</a>
                 </td>
             </tr>
             {% endfor %}
