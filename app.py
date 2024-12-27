@@ -34,6 +34,7 @@ def edit_country():
     return render_template('modify_cty.html')
 
 # 國家修改提交
+#新增國家
 @app.route('/save-country', methods=['POST'])
 def save_country():
     # 接收表單數據
@@ -80,6 +81,7 @@ def save_country():
         return jsonify({'status': 'error', 'message': 'Database operation failed'}), 500
 
 
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.get_json()
@@ -93,9 +95,35 @@ def analyze():
     cursor.execute("INSERT INTO weights (countrySize, density, army, forest, safety, politicalRights, civilLiberties, education, healthcare, economicStatus) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data["countrySize"], data["density"], data["army"], data["forest"], data["safety"], data["politicalRights"], data["civilLiberties"], data["education"], data["healthcare"], data["economicStatus"]))
     conn.commit()
 
+    # 換成百分比數
+    cursor.execute("CREATE TEMPORARY TABLE temp_percentiles AS SELECT country_name, PERCENT_RANK() OVER (ORDER BY LandArea) AS percentile FROM countryinfo")
+    conn.commit()
+    cursor.execute("UPDATE countryinfo ci JOIN temp_percentiles tp ON ci.country_name = tp.country_name SET ci.LandArea_perc = tp.percentile")
+    conn.commit()
+    cursor.execute("DROP TEMPORARY TABLE temp_percentiles")
+    conn.commit()
+    cursor.execute("CREATE TEMPORARY TABLE temp_percentiles AS SELECT country_name, PERCENT_RANK() OVER (ORDER BY PopulationDensity) AS percentile FROM countryinfo")
+    conn.commit()
+    cursor.execute("UPDATE countryinfo ci JOIN temp_percentiles tp ON ci.country_name = tp.country_name SET ci.PopulationDensity_perc = tp.percentile")
+    conn.commit()
+    cursor.execute("DROP TEMPORARY TABLE temp_percentiles")
+    conn.commit()
+    cursor.execute("CREATE TEMPORARY TABLE temp_percentiles AS SELECT country_name, PERCENT_RANK() OVER (ORDER BY ArmedForcesSize) AS percentile FROM countryinfo")
+    conn.commit()
+    cursor.execute("UPDATE countryinfo ci JOIN temp_percentiles tp ON ci.country_name = tp.country_name SET ci.ArmedForcesSize_perc = tp.percentile")
+    conn.commit()
+    cursor.execute("DROP TEMPORARY TABLE temp_percentiles")
+    conn.commit()
+    cursor.execute("CREATE TEMPORARY TABLE temp_percentiles AS SELECT country_name, PERCENT_RANK() OVER (ORDER BY CPI) AS percentile FROM countryinfo")
+    conn.commit()
+    cursor.execute("UPDATE countryinfo ci JOIN temp_percentiles tp ON ci.country_name = tp.country_name SET ci.CPI_perc = tp.percentile")
+    conn.commit()
+    cursor.execute("DROP TEMPORARY TABLE temp_percentiles")
+    conn.commit()
+
     # 處理數據的邏輯
-    cursor.execute("SELECT C.country_name, (C.LandArea / 1454000) * W.countrySize + (C.PopulationDensity / 26337) * W.density + (C.ArmedForcesSize / 1359000) * W.army + (C.ForestedArea_Percentage) * W.forest + (C.SafetySecurity / 100) * W.safety + (C.Governance / 100) * W.politicalRights + (C.PersonelFreedom / 100) * W.civilLiberties + (C.Education) * W.education + (C.Health / 100) * W.healthcare + (C.CPI / 4583.71) * W.economicStatus AS weightedScore FROM countryinfo AS C, weights AS W ORDER BY weightedScore DESC LIMIT 3")
-    
+    cursor.execute("SELECT C.country_name, C.LandArea_perc * W.countrySize + C.PopulationDensity_perc * W.density + C.ArmedForcesSize_perc * W.army + (C.ForestedArea_Percentage / 100) * W.forest + (C.SafetySecurity / 100) * W.safety + (C.Governance / 100) * W.politicalRights + (C.PersonelFreedom / 100) * W.civilLiberties + (C.Education / 100) * W.education + (C.Health / 100) * W.healthcare + C.CPI_perc * W.economicStatus AS weightedScore FROM countryinfo AS C, weights AS W ORDER BY weightedScore DESC LIMIT 3")
+
     top_countries = []
     for results in cursor.fetchmany(3):
         top_countries.append(results[0])
@@ -111,9 +139,9 @@ def search_country():
     country_name = request.form.get('country_name')
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(dictionary=True)  # 確保返回字典形式
         cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
-        country = cursor.fetchone()
+        country = cursor.fetchone()  # 獲取單筆結果
         cursor.close()
         conn.close()
 
@@ -125,7 +153,7 @@ def search_country():
             return "找不到該國家數據", 404
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
-        return "系統錯誤，請稍後再試", 500
+        return "系統錯誤，請稍後再試", 500    
 
 @app.route('/update-country', methods=['POST'])
 def update_country():
