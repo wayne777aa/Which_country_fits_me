@@ -5,10 +5,10 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用於session加密
 
 db_config = {
-    'host': 'localhost',
+    'host': '127.0.0.1',
     'user': 'root', # change to your own
-    'password': 'localhost', # change to your own
-    'database': 'countries'
+    'password': '', # change to your own
+    'database': 'final_report'
 }
 
 def get_db_connection():
@@ -31,10 +31,39 @@ def add_country():
 # 修改國家
 @app.route('/edit-country')
 def edit_country():
-    return render_template('modify_cty.html')
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT country_name FROM countryinfo WHERE iseditable = 1")
+        countries = cursor.fetchall()
+        cursor.close()
+        conn.close()
 
-# 國家修改提交
-#新增國家
+        return render_template('modify_cty.html', countries=countries)
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+#修改按鈕
+@app.route('/edit-country-form/<string:country_name>')
+def edit_country_form(country_name):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
+        country = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if country:
+            return render_template('display.html', country=country)
+        else:
+            return "找不到該國家數據", 404
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+#國家新增提交
 @app.route('/save-country', methods=['POST'])
 def save_country():
     # 接收表單數據
@@ -62,11 +91,11 @@ def save_country():
         cursor.execute("""
             INSERT INTO countryinfo (
                 country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
-                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI, iseditable
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             country_name, area, population_density, military_size, forest_percentage,
-            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi
+            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1  # iseditable 設為 0
         ))
 
         # 提交更改並關閉連接
