@@ -5,10 +5,10 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用於session加密
 
 db_config = {
-    'host': 'localhost',
+    'host': '127.0.0.1',
     'user': 'root', # change to your own
-    'password': 'localhost', # change to your own
-    'database': 'countries'
+    'password': '', # change to your own
+    'database': 'final_report'
 }
 
 def get_db_connection():
@@ -31,7 +31,37 @@ def add_country():
 # 修改國家
 @app.route('/edit-country')
 def edit_country():
-    return render_template('modify_cty.html')
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT country_name FROM countryinfo")
+        countries = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return render_template('modify_cty.html', countries=countries)
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
+
+#編輯按鈕
+@app.route('/edit-country-form/<string:country_name>')
+def edit_country_form(country_name):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
+        country = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if country:
+            return render_template('display.html', **country)
+        else:
+            return "找不到該國家數據", 404
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return "系統錯誤，請稍後再試", 500
 
 # 國家修改提交
 @app.route('/save-country', methods=['POST'])
