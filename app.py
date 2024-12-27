@@ -56,7 +56,7 @@ def edit_country_form(country_name):
         conn.close()
 
         if country:
-            return render_template('display.html', **country)
+            return render_template('display.html', country=country)
         else:
             return "找不到該國家數據", 404
     except mysql.connector.Error as err:
