@@ -94,7 +94,7 @@ ignore 1 lines;
 
 CREATE TABLE countryinfo as
 Select temp.country_name, temp.LandArea, temp.PopulationDensity, temp.ArmedForcesSize, temp.ForestedArea_Percentage, 
-       temp.SafetySecurity, temp.Governance, temp.PersonelFreedom, temp.Education, temp.Health,  temp.CPI
+       temp.SafetySecurity, temp.Governance, temp.PersonelFreedom, temp.Education, temp.Health,  temp.CPI, 0 AS iseditable
 From (Select D.country_name, D.AveragScore, D.SafetySecurity, D.PersonelFreedom, D.Governance, D.SocialCapital, D.InvestmentEnvironment, D.EnterpriseConditions, D.MarketAccessInfrastructure, D.EconomicQuality, D.LivingConditions, D.Health, D.Education, D.NaturalEnvironment,
              WD.PopulationDensity, WD.Abbreviation, WD.Agricultural_Land_Percentage, WD.LandArea, WD.ArmedForcesSize, WD.BirthRate, WD.CallingCode, WD.Capital, WD.CO2Emissions, WD.CPI, WD.CPIChange_Percentage, WD.CurrencyCode, WD.FertilityRate, WD.ForestedArea_Percentage, WD.Gasoline_Price, WD.GDP, WD.GrossPrimaryEducationEnrollment_Percentage, WD.GrossTertiaryEducationEnrollment_Percentage, WD.InfantMortality, WD.LargestCity, WD.LifeExpectancy, WD.MaternalMortalityRatio, WD.MinimumWage, WD.OfficialLanguage, WD.OutofPocketHealthExpenditure_Percentage, WD.PhysiciansperThousand, WD.Population, WD.LaborForceParticipation_Percentage, WD.TaxRevenue_Percentage, WD.TotalTaxRate_Percentage, WD.UnemploymentRate_Percentage, WD.UrbanPopulation, WD.Latitude, WD.Longitude
       From Development AS D 

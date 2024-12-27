@@ -34,7 +34,7 @@ def edit_country():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT country_name FROM countryinfo")
+        cursor.execute("SELECT country_name FROM countryinfo WHERE iseditable = 1")
         countries = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -44,7 +44,7 @@ def edit_country():
         print(f"Database error: {err}")
         return "系統錯誤，請稍後再試", 500
 
-#編輯按鈕
+#修改按鈕
 @app.route('/edit-country-form/<string:country_name>')
 def edit_country_form(country_name):
     try:
@@ -63,7 +63,7 @@ def edit_country_form(country_name):
         print(f"Database error: {err}")
         return "系統錯誤，請稍後再試", 500
 
-# 國家修改提交
+#國家新增提交
 @app.route('/save-country', methods=['POST'])
 def save_country():
     # 接收表單數據
@@ -91,11 +91,11 @@ def save_country():
         cursor.execute("""
             INSERT INTO countryinfo (
                 country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
-                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI, iseditable
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             country_name, area, population_density, military_size, forest_percentage,
-            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi
+            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1  # iseditable 設為 0
         ))
 
         # 提交更改並關閉連接
@@ -136,27 +136,7 @@ def analyze():
     session['top_countries'] = top_countries
     return jsonify({'status': 'success'})
 
-@app.route('/search-country', methods=['POST'])
-def search_country():
-    country_name = request.form.get('country_name')
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
-        country = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if country:
-            # 成功找到國家數據，渲染展示頁面
-            return render_template('display.html', **country)
-        else:
-            # 如果找不到數據，顯示錯誤訊息
-            return "找不到該國家數據", 404
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
-        return "系統錯誤，請稍後再試", 500
-
+#國家修改提交
 @app.route('/update-country', methods=['POST'])
 def update_country():
     try:
