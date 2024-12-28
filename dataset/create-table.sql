@@ -29,7 +29,7 @@ CREATE TABLE World_data(
     Abbreviation varchar(50),
     Agricultural_Land_Percentage float,
     LandArea int,
-    ArmedForcesSize int,
+    ArmedForcesSize float default 0,
     BirthRate float,
     CallingCode varchar(50),
     Capital varchar(50),
@@ -100,8 +100,16 @@ From (Select D.country_name, D.AveragScore, D.SafetySecurity, D.PersonelFreedom,
       From Development AS D 
       Inner join World_data AS WD ON D.country_name = WD.country_name2) AS temp
 Inner join world_happiness AS WH
-ON temp.country_name = WH.country_name3
-;
+ON temp.country_name = WH.country_name3;
+
+ALTER TABLE countryinfo
+ADD COLUMN LandArea_perc DECIMAL(5, 4);
+ALTER TABLE countryinfo
+ADD COLUMN PopulationDensity_perc DECIMAL(5, 4);
+ALTER TABLE countryinfo
+ADD COLUMN ArmedForcesSize_perc DECIMAL(5, 4);
+ALTER TABLE countryinfo
+ADD COLUMN CPI_perc DECIMAL(5, 4);
 
 
 CREATE TABLE weights(
