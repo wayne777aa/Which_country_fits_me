@@ -8,7 +8,7 @@ db_config = {
     'host': '127.0.0.1',
     'user': 'root', # change to your own
     'password': '', # change to your own
-    'database': 'countries'
+    'database': ''
 }
 
 def get_db_connection():
