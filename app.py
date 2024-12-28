@@ -91,9 +91,6 @@ def save_country():
     healthcare_score = request.form['healthcare_score']
     cpi = request.form['cpi']
 
-    # 假設性默認值（針對未提到的欄位）
-    default_governance = (float(political_rights) + float(civil_liberties)) / 2  # 假設 Governance = (政治權利 + 公民自由) / 2
-
     # 建立資料庫連接並插入數據
     try:
         conn = get_db_connection()
