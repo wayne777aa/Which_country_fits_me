@@ -8,7 +8,7 @@ db_config = {
     'host': '127.0.0.1',
     'user': 'root', # change to your own
     'password': '', # change to your own
-    'database': 'final_report'
+    'database': ''
 }
 
 def get_db_connection():
@@ -43,6 +43,18 @@ def edit_country():
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
         return "系統錯誤，請稍後再試", 500
+
+#刪除按鈕
+@app.route('/delete-country/<string:country_name>')
+def delete_country(country_name):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("DELETE FROM countryinfo WHERE country_name = %s", (country_name,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return render_template("index.html")
 
 #修改按鈕
 @app.route('/edit-country-form/<string:country_name>')
@@ -87,16 +99,22 @@ def save_country():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 插入數據到 countryinfo
-        cursor.execute("""
-            INSERT INTO countryinfo (
-                country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
-                SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI, iseditable
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            country_name, area, population_density, military_size, forest_percentage,
-            safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1  # iseditable 設為 0
-        ))
+        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
+        country = cursor.fetchone()
+        
+        if country:
+            return render_template("error_same_country.html")
+        else:
+            # 插入數據到 countryinfo
+            cursor.execute("""
+                INSERT INTO countryinfo (
+                    country_name, LandArea, PopulationDensity, ArmedForcesSize, ForestedArea_Percentage,
+                    SafetySecurity, Governance, PersonelFreedom, Education, Health, CPI, iseditable
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                country_name, area, population_density, military_size, forest_percentage,
+                safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1  # iseditable 設為 0
+            ))
 
         # 提交更改並關閉連接
         conn.commit()
@@ -108,8 +126,6 @@ def save_country():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({'status': 'error', 'message': 'Database operation failed'}), 500
-
-
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -184,6 +200,7 @@ def search_country():
         print(f"Database error: {err}")
         return "系統錯誤，請稍後再試", 500    
 
+#國家修改提交
 @app.route('/update-country', methods=['POST'])
 def update_country():
     try:
@@ -219,8 +236,6 @@ def update_country():
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
         return "系統錯誤，請稍後再試", 500
-
-
 
 # 結果
 @app.route('/result')
