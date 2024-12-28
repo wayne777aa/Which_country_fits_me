@@ -179,27 +179,6 @@ def analyze():
     session['top_countries'] = top_countries
     return jsonify({'status': 'success'})
 
-@app.route('/search-country', methods=['POST'])
-def search_country():
-    country_name = request.form.get('country_name')
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)  # 確保返回字典形式
-        cursor.execute("SELECT * FROM countryinfo WHERE country_name = %s", (country_name,))
-        country = cursor.fetchone()  # 獲取單筆結果
-        cursor.close()
-        conn.close()
-
-        if country:
-            # 成功找到國家數據，渲染展示頁面
-            return render_template('display.html', **country)
-        else:
-            # 如果找不到數據，顯示錯誤訊息
-            return "找不到該國家數據", 404
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
-        return "系統錯誤，請稍後再試", 500    
-
 #國家修改提交
 @app.route('/update-country', methods=['POST'])
 def update_country():
