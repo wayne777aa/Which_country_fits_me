@@ -110,7 +110,7 @@ def save_country():
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 country_name, area, population_density, military_size, forest_percentage,
-                safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1  # iseditable 設為 0
+                safety_score, default_governance, civil_liberties, education_score, healthcare_score, cpi, 1 
             ))
 
         # 提交更改並關閉連接
